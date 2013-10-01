@@ -1,0 +1,33 @@
+LatestRestorableTime
+Engine
+PendingModifiedValues
+BackupRetentionPeriod
+MultiAZ
+LicenseModel
+DBInstanceStatus
+EngineVersion
+Endpoint>
+             Port
+			 Address
+
+DBInstanceIdentifier
+DBParameterGroups>
+							DBParameterGroup>
+													ParameterApplyStatus
+													DBParameterGroupName
+DBSecurityGroups>
+                           DBSecurityGroup>
+													Status
+													DBSecurityGroupName
+PreferredBackupWindow
+AutoMinorVersionUpgrade
+PreferredMaintenanceWindow
+AvailabilityZone
+InstanceCreateTime
+AllocatedStorage
+OptionGroupMemberships>
+									OptionGroupMembership>
+																OptionGroupName
+																Status
+DBInstanceClass
+MasterUsername

@@ -15,7 +15,8 @@ import (
 	"encoding/hex"
 	"encoding/xml"
 	"fmt"
-	"github.com/crowdmob/goamz/aws"
+	//"github.com/crowdmob/goamz/aws"
+	"github.com/DerekL/goamz/aws"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -415,6 +416,7 @@ func (ec2 *EC2) Addresses(instIds []string, filter *Filter) (resp *AddressesResp
 	}
 	return
 }
+
 // Response to a DescribeInstances request.
 //
 // See http://goo.gl/mLbmw for more details.

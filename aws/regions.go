@@ -3,6 +3,7 @@ package aws
 var USEast = Region{
 	"us-east-1",
 	"https://ec2.us-east-1.amazonaws.com",
+	"https://rds.us-east-1.amazonaws.com",
 	"https://s3.amazonaws.com",
 	"",
 	false,
@@ -19,6 +20,7 @@ var USEast = Region{
 var USWest = Region{
 	"us-west-1",
 	"https://ec2.us-west-1.amazonaws.com",
+	"https://rds.us-west-1.amazonaws.com",
 	"https://s3-us-west-1.amazonaws.com",
 	"",
 	true,
@@ -35,6 +37,7 @@ var USWest = Region{
 var USWest2 = Region{
 	"us-west-2",
 	"https://ec2.us-west-2.amazonaws.com",
+	"https://rds.us-west-2.amazonaws.com",
 	"https://s3-us-west-2.amazonaws.com",
 	"",
 	true,
@@ -51,6 +54,7 @@ var USWest2 = Region{
 var EUWest = Region{
 	"eu-west-1",
 	"https://ec2.eu-west-1.amazonaws.com",
+	"https://rds.eu-west-1.amazonaws.com",
 	"https://s3-eu-west-1.amazonaws.com",
 	"",
 	true,
@@ -67,6 +71,7 @@ var EUWest = Region{
 var APSoutheast = Region{
 	"ap-southeast-1",
 	"https://ec2.ap-southeast-1.amazonaws.com",
+	"http://rds.ap-southeast-1.amazonaws.com",
 	"https://s3-ap-southeast-1.amazonaws.com",
 	"",
 	true,
@@ -83,6 +88,7 @@ var APSoutheast = Region{
 var APSoutheast2 = Region{
 	"ap-southeast-2",
 	"https://ec2.ap-southeast-2.amazonaws.com",
+	"http://rds.ap-southeast-2.amazonaws.com",
 	"https://s3-ap-southeast-2.amazonaws.com",
 	"",
 	true,
@@ -99,6 +105,7 @@ var APSoutheast2 = Region{
 var APNortheast = Region{
 	"ap-northeast-1",
 	"https://ec2.ap-northeast-1.amazonaws.com",
+	"http://rds.ap-northeast-1.amazonaws.com",
 	"https://s3-ap-northeast-1.amazonaws.com",
 	"",
 	true,
@@ -116,6 +123,7 @@ var SAEast = Region{
 	"sa-east-1",
 	"https://ec2.sa-east-1.amazonaws.com",
 	"https://s3-sa-east-1.amazonaws.com",
+	"https://rds.sa-east-1.amazonaws.com",
 	"",
 	true,
 	true,
