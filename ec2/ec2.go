@@ -400,16 +400,53 @@ type Address struct {
 	InstanceID string `xml:"instanceId"`
 }
 
-// Instances returns details about instances in EC2.  Both parameters
+// Addresses returns details about addresses in EC2.  Both parameters
 // are optional, and if provided will limit the instances returned to those
 // matching the given instance ids or filtering rules.
-//
-// See http://goo.gl/4No7c for more details.
+//http://docs.aws.amazon.com/AWSEC2/latest/APIReference/ApiReference-query-DescribeAddresses.html
+
 func (ec2 *EC2) Addresses(instIds []string, filter *Filter) (resp *AddressesResp, err error) {
 	params := makeParams("DescribeAddresses")
 	addParamsList(params, "InstanceId", instIds)
 	filter.addParams(params)
 	resp = &AddressesResp{}
+	err = ec2.query(params, resp)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+type VolumesResp struct {
+	RequestId string   `xml:"requestId"`
+	Volumes   []Volume `xml:"volumeSet>item"`
+}
+
+type Volume struct {
+	VolumeId         string       `xml:"volumeId"`
+	Size             string       `xml:"size"`
+	SnapshotId       string       `xml:"snapshotId"`
+	AvailabilityZone string       `xml:"availabilityZone"`
+	Status           string       `xml:"status"`
+	AttachmentSet    []Attachment `xml:"attachmentSet>item"`
+	CreateTime       string       `xml:"createTime"`
+	VolumeType       string       `xml:"volumeType"`
+}
+
+type Attachment struct {
+	VolumeId            string `xml:"volumeId"`
+	InstanceId          string `xml:"instanceId"`
+	Device              string `xml:"device"`
+	Status              string `xml:"status"`
+	AttachTime          string `xml:"attachTime"`
+	DeleteOnTermination string `xml:"deleteOnTermination"`
+}
+
+func (ec2 *EC2) Volumes(volIds []string, filter *Filter) (resp *VolumesResp, err error) {
+	params := makeParams("DescribeVolumes")
+	//addParamsList(params, "VolumeId", volIds)
+	filter.addParams(params)
+	resp = &VolumesResp{}
 	err = ec2.query(params, resp)
 	if err != nil {
 		return nil, err
