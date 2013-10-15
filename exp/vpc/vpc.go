@@ -12,7 +12,7 @@
 // Go conventions. It must be polished before it's considered a
 // first-class package in goamz.
 
-package rds
+package vpc
 
 import (
 	//"crypto/rand"
@@ -31,100 +31,64 @@ import (
 
 const debug = true
 
-// The RDS type encapsulates operations with a specific RDS region.
-type RDS struct {
+// The VPC type encapsulates operations with a specific VPC region.
+type VPC struct {
 	aws.Auth
 	aws.Region
 	private byte // Reserve the right of using private data.
 }
 
-// New creates a new RDS.
-func New(auth aws.Auth, region aws.Region) *RDS {
-	return &RDS{auth, region, 0}
+// New creates a new VPC.
+func New(auth aws.Auth, region aws.Region) *VPC {
+	return &VPC{auth, region, 0}
 }
 
-type RDSDescribeParamGroupsResp struct {
-	ParameterGroups []ParameterGroup `xml:"DescribeDBParameterGroupsResult>DBParameterGroups>DBParameterGroup"`
+type VPCResp struct {
+	Instances []VPCInstance `xml:"vpcSet>item"`
 }
 
-//  Struct allowing for capture of parameter group info
-type ParameterGroup struct {
-	Family      string `xml:"DBParameterGroupFamily"`
-	Description string `xml:"Description"`
-	Name        string `xml:"DBParameterGroupName"`
-}
-type RDSDescribeParamsResp struct {
-	Parameters []Parameter `xml:"DescribeDBParametersResult>Parameters>Parameter"`
-}
-
-type Parameter struct {
-	ParameterValue string `xml:"ParameterValue"`
-	DataType       string `xml:"DataType"`
-	Sourcesystem   string `xml:"Sourcesystem"`
-	IsModifiable   string `xml:"IsModifiable"`
-	Description    string `xml:"Description "`
-	ApplyType      string `xml:"ApplyType "`
-	ParameterName  string `xml:"ParameterName"`
+type VPCInstance struct {
+	VPCInstanceIdentifier string `xml:"vpcId"`
+	VPCInstanceState      string `xml:"state"`
+	VPCcidrBlock          string `xml:"cidrBlock"`
+	VPCdhcpOptionsId      string `xml:"dhcpOptionsId"`
+	VPCinstanceTenancy    string `xml:"instanceTenancy"`
+	VPCisDefault          string `xml:"isDefault"`
 }
 
-type RDSResp struct {
-	Instances []DBInstance `xml:"DescribeDBInstancesResult>DBInstances>DBInstance"`
-}
-
-type DBInstance struct {
-	LatestRestorableTime       string `xml:"LatestRestorableTime"`
-	Engine                     string `xml:"Engine"`
-	PendingModifiedValues      string `xml:"PendingModifiedValues"`
-	BackupRetentionPeriod      string `xml:"BackupRetentionPeriod"`
-	MultiAZ                    string `xml:"MultiAZ"`
-	LicenseModel               string `xml:"LicenseModel"`
-	DBInstanceStatus           string `xml:"DBInstanceStatus"`
-	EngineVersion              string `xml:"EngineVersion"`
-	EndpointPort               string `xml:"Endpoint>Port"`
-	EndpointAddress            string `xml:"Endpoint>Address"`
-	InstanceIdentifier         string `xml:"DBInstanceIdentifier"`
-	SecurityGroupStatus        string `xml:"DBSecurityGroups>DBSecurityGroup>Status"`
-	SecurityGroupName          string `xml:"DBSecurityGroups>DBSecurityGroup>DBSecurityGroupName"`
-	PreferredBackupWindow      string `xml:"PreferredBackupWindow"`
-	AutoMinorVersionUpgrade    string `xml:"AutoMinorVersionUpgrade"`
-	PreferredMaintenanceWindow string `xml:"PreferredMaintenanceWindow"`
-	AvailabilityZone           string `xml:"AvailabilityZone"`
-	InstanceCreateTime         string `xml:"InstanceCreateTime"`
-	AllocatedStorage           string `xml:"AllocatedStorage"`
-	DBInstanceClass            string `xml:"DBInstanceClass"`
-	MasterUsername             string `xml:"MasterUsername"`
-}
-
-func (RDS *RDS) DescribeInstances(instIds []string, filter *Filter) (resp *RDSResp, err error) {
-	params := makeParams("DescribeDBInstances")
-	addParamsList(params, "InstanceId", instIds)
+func (VPC *VPC) DescribeInstances(vpcIds []string, filter *Filter) (resp *VPCResp, err error) {
+	params := makeParams("DescribeVpcs")
+	addParamsList(params, "VpcId", vpcIds)
 	filter.addParams(params)
-	resp = &RDSResp{}
-	err = RDS.query(params, resp)
+	resp = &VPCResp{}
+	err = VPC.query(params, resp)
 	if err != nil {
 		return nil, err
 	}
 	return
 }
 
-func (RDS *RDS) DescribeDBParameterGroups(groupNames []string, filter *Filter) (resp *RDSDescribeParamGroupsResp, err error) {
-	params := makeParams("DescribeDBParameterGroups")
-	addParamsList(params, "DBParameterGroupName", groupNames)
-	filter.addParams(params)
-	resp = &RDSDescribeParamGroupsResp{}
-	err = RDS.query(params, resp)
-	if err != nil {
-		return nil, err
-	}
-	return
+type SubnetResp struct {
+	Subnets []Subnet `xml:"subnetSet>item"`
 }
 
-func (RDS *RDS) DescribeDBParameters(groupname []string, filter *Filter) (resp *RDSDescribeParamsResp, err error) {
-	params := makeParams("DescribeDBParameters")
-	addParamsList(params, "DBParameterGroupName", groupname)
+type Subnet struct {
+	SubnetIdentifier              string `xml:"subnetId"`
+	SubnetState                   string `xml:"state"`
+	SubnetVPCId                   string `xml:"vpcId"`
+	SubnetcidrBlock               string `xml:"cidrBlock"`
+	SubnetavailableIpAddressCount string `xml:"availableIpAddressCount"`
+	SubnetavailabilityZone        string `xml:"availabilityZone"`
+	SubnetdefaultForAz            string `xml:"defaultForAz"`
+	SubnetmapPublicIpOnLaunch     string `xml:"mapPublicIpOnLaunch"`
+}
+
+func (VPC *VPC) DescribeSubnets(subnetIds []string, filter *Filter) (resp *SubnetResp, err error) {
+	params := makeParams("DescribeSubnets")
+	addParamsList(params, "SubnetId", subnetIds)
 	filter.addParams(params)
-	resp = &RDSDescribeParamsResp{}
-	err = RDS.query(params, resp)
+	resp = &SubnetResp{}
+	err = VPC.query(params, resp)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +142,7 @@ func (f *Filter) addParams(params map[string]string) {
 // ----------------------------------------------------------------------------
 // Request dispatching logic.
 
-// Error encapsulates an error returned by RDS.
+// Error encapsulates an error returned by VPC.
 //
 // See http://goo.gl/VZGuC for more details.
 type Error struct {
@@ -210,17 +174,18 @@ type xmlErrors struct {
 
 var timeNow = time.Now
 
-func (rds *RDS) query(params map[string]string, resp interface{}) error {
-	params["Version"] = "2013-05-15"
+func (vpc *VPC) query(params map[string]string, resp interface{}) error {
+	//params["Version"] = "2011-07-15"
+	params["Version"] = "2013-10-01"
 	params["Timestamp"] = timeNow().In(time.UTC).Format(time.RFC3339)
-	endpoint, err := url.Parse(rds.Region.RDSEndpoint)
+	endpoint, err := url.Parse(vpc.Region.EC2Endpoint)
 	if err != nil {
 		return err
 	}
 	if endpoint.Path == "" {
 		endpoint.Path = "/"
 	}
-	sign(rds.Auth, "GET", endpoint.Path, params, endpoint.Host)
+	sign(vpc.Auth, "GET", endpoint.Path, params, endpoint.Host)
 	endpoint.RawQuery = multimap(params).Encode()
 	if debug {
 		log.Printf("get { %v } -> {\n", endpoint.String())
