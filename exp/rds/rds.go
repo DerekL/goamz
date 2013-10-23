@@ -15,8 +15,6 @@
 package rds
 
 import (
-	//"crypto/rand"
-	//"encoding/hex"
 	"encoding/xml"
 	"fmt"
 	"github.com/DerekL/goamz/aws"
@@ -43,6 +41,15 @@ func New(auth aws.Auth, region aws.Region) *RDS {
 	return &RDS{auth, region, 0}
 }
 
+type ListTagsForResourceResp struct {
+	TagsList []Tag `xml:"ListTagsForResourceResult>TagList>Tag"`
+}
+
+type Tag struct {
+	Key   string `xml:"Key"`
+	Value string `xml:"Value"`
+}
+
 type RDSDescribeParamGroupsResp struct {
 	ParameterGroups []ParameterGroup `xml:"DescribeDBParameterGroupsResult>DBParameterGroups>DBParameterGroup"`
 }
@@ -52,6 +59,8 @@ type ParameterGroup struct {
 	Family      string `xml:"DBParameterGroupFamily"`
 	Description string `xml:"Description"`
 	Name        string `xml:"DBParameterGroupName"`
+	AWSAccount  string `xml:"AWSAccount"`
+	AWSRegion   string `xml:"AWSRegion"`
 }
 type RDSDescribeParamsResp struct {
 	Parameters []Parameter `xml:"DescribeDBParametersResult>Parameters>Parameter"`
@@ -93,6 +102,8 @@ type DBInstance struct {
 	AllocatedStorage           string `xml:"AllocatedStorage"`
 	DBInstanceClass            string `xml:"DBInstanceClass"`
 	MasterUsername             string `xml:"MasterUsername"`
+	AWSAccount                 string `xml:"AWSAccount"`
+	AWSRegion                  string `xml:"AWSRegion"`
 }
 
 func (RDS *RDS) DescribeInstances(instIds []string, filter *Filter) (resp *RDSResp, err error) {
@@ -124,6 +135,17 @@ func (RDS *RDS) DescribeDBParameters(groupname []string, filter *Filter) (resp *
 	addParamsList(params, "DBParameterGroupName", groupname)
 	filter.addParams(params)
 	resp = &RDSDescribeParamsResp{}
+	err = RDS.query(params, resp)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (RDS *RDS) ListTagsForResource(resource string) (resp *ListTagsForResourceResp, err error) {
+	params := makeParams("ListTagsForResource")
+	addParams(params, "ResourceName", resource)
+	resp = &ListTagsForResourceResp{}
 	err = RDS.query(params, resp)
 	if err != nil {
 		return nil, err
@@ -276,4 +298,10 @@ func addParamsList(params map[string]string, label string, ids []string) {
 	for i, id := range ids {
 		params[label+"."+strconv.Itoa(i+1)] = id
 	}
+}
+
+func addParams(params map[string]string, label string, id string) {
+
+	params[label] = id
+
 }

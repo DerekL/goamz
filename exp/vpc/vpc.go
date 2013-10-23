@@ -29,7 +29,7 @@ import (
 	"time"
 )
 
-const debug = true
+const debug = false
 
 // The VPC type encapsulates operations with a specific VPC region.
 type VPC struct {
@@ -54,6 +54,8 @@ type VPCInstance struct {
 	VPCdhcpOptionsId      string `xml:"dhcpOptionsId"`
 	VPCinstanceTenancy    string `xml:"instanceTenancy"`
 	VPCisDefault          string `xml:"isDefault"`
+	AWSAccount            string `xml:"AWSAccount"`
+	AWSRegion             string `xml:"AWSRegion"`
 }
 
 func (VPC *VPC) DescribeInstances(vpcIds []string, filter *Filter) (resp *VPCResp, err error) {
@@ -81,6 +83,8 @@ type Subnet struct {
 	SubnetavailabilityZone        string `xml:"availabilityZone"`
 	SubnetdefaultForAz            string `xml:"defaultForAz"`
 	SubnetmapPublicIpOnLaunch     string `xml:"mapPublicIpOnLaunch"`
+	AWSAccount                    string `xml:"AWSAccount"`
+	AWSRegion                     string `xml:"AWSRegion"`
 }
 
 func (VPC *VPC) DescribeSubnets(subnetIds []string, filter *Filter) (resp *SubnetResp, err error) {

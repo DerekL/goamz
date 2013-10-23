@@ -246,6 +246,8 @@ type Instance struct {
 	State              InstanceState `xml:"instanceState"`
 	Tags               []Tag         `xml:"tagSet>item"`
 	IamInstanceProfile string        `xml:"iamInstanceProfile"`
+	AWSAccount         string        `xml:"AWSAccount"`
+	AWSRegion          string        `xml:"AWSRegion"`
 }
 
 // RunInstances starts new instances in EC2.
@@ -431,6 +433,8 @@ type Volume struct {
 	AttachmentSet    []Attachment `xml:"attachmentSet>item"`
 	CreateTime       string       `xml:"createTime"`
 	VolumeType       string       `xml:"volumeType"`
+	AWSAccount       string       `xml:"AWSAccount"`
+	AWSRegion        string       `xml:"AWSRegion"`
 }
 
 type Attachment struct {
