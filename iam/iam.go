@@ -4,7 +4,7 @@ package iam
 
 import (
 	"encoding/xml"
-	"github.com/crowdmob/goamz/aws"
+	"github.com/DerekL/goamz/aws"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -107,10 +107,33 @@ type CreateUserResp struct {
 //
 // See http://goo.gl/BwIQ3 for more details.
 type User struct {
-	Arn  string
-	Path string
-	Id   string `xml:"UserId"`
-	Name string `xml:"UserName"`
+	Arn        string `xml:"Arn"`
+	Path       string `xml:"Path"`
+	Id         string `xml:"UserId"`
+	Name       string `xml:"UserName"`
+	AWSAccount string `xml:"AWSAccount"`
+	AWSRegion  string `xml:"AWSRegion"`
+}
+
+// ListUsers lists users in IAM.
+//
+// See http://docs.aws.amazon.com/IAM/latest/APIReference/API_ListUsers.html
+func (iam *IAM) ListUsers(marker string, maxitems int, pathprefix string) (*ListUsersResp, error) {
+	params := map[string]string{
+		"Action":     "ListUsers",
+		"MaxItems":   strconv.Itoa(maxitems),
+		"PathPrefix": pathprefix,
+	}
+	resp := new(ListUsersResp)
+	if err := iam.query(params, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+type ListUsersResp struct {
+	RequestId string `xml:"ResponseMetadata>RequestId"`
+	Users     []User `xml:"ListUsersResult>Users>member"`
 }
 
 // CreateUser creates a new user in IAM.
@@ -179,10 +202,12 @@ type CreateGroupResp struct {
 //
 // See http://goo.gl/ae7Vs for more details.
 type Group struct {
-	Arn  string
-	Id   string `xml:"GroupId"`
-	Name string `xml:"GroupName"`
-	Path string
+	Arn        string `xml:"Arn"`
+	Id         string `xml:"GroupId"`
+	Name       string `xml:"GroupName"`
+	Path       string `xml:"Path"`
+	AWSAccount string `xml:"AWSAccount"`
+	AWSRegion  string `xml:"AWSRegion"`
 }
 
 // CreateGroup creates a new group in IAM.
@@ -216,7 +241,15 @@ type GroupsResp struct {
 	RequestId string  `xml:"ResponseMetadata>RequestId"`
 }
 
-// Groups list the groups that have the specified path prefix.
+// Response to a ListGroupsForUser request.
+//
+// See http://docs.aws.amazon.com/IAM/latest/APIReference/API_ListGroupsForUser.html
+type GroupsForUserResp struct {
+	Groups    []Group `xml:"ListGroupsForUserResult>Groups>member"`
+	RequestId string  `xml:"ResponseMetadata>RequestId"`
+}
+
+// Groups the groups that have the specified path prefix.
 //
 // The parameter pathPrefix is optional. If pathPrefix is "", all groups are
 // returned.
@@ -230,6 +263,26 @@ func (iam *IAM) Groups(pathPrefix string) (*GroupsResp, error) {
 		params["PathPrefix"] = pathPrefix
 	}
 	resp := new(GroupsResp)
+	if err := iam.query(params, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// Groups the groups that have the specified path prefix.
+//
+// The parameter pathPrefix is optional. If pathPrefix is "", all groups are
+// returned.
+//
+// See http://goo.gl/W2TRj for more details.
+func (iam *IAM) ListGroupsForUser(user string) (*GroupsForUserResp, error) {
+	params := map[string]string{
+		"Action": "ListGroupsForUser",
+	}
+	if user != "" {
+		params["UserName"] = user
+	}
+	resp := new(GroupsForUserResp)
 	if err := iam.query(params, resp); err != nil {
 		return nil, err
 	}
@@ -429,4 +482,36 @@ func (e *Error) Error() string {
 		prefix = strconv.Itoa(e.StatusCode) + ": "
 	}
 	return prefix + e.Message
+}
+
+//Adding types for Role work
+type Role struct {
+	Arn                      string `xml:"Arn"`
+	Path                     string `xml:"Path"`
+	Id                       string `xml:"RoleId"`
+	Name                     string `xml:"RoleName"`
+	AssumeRolePolicyDocument string `xml:"AssumeRolePolicyDocument"`
+	CreateDate               string `xml:"CreateDate"`
+	AWSAccount               string `xml:"AWSAccount"`
+	AWSRegion                string `xml:"AWSRegion"`
+}
+
+type ListRolesResp struct {
+	RequestId string `xml:"ResponseMetadata>RequestId"`
+	Roles     []Role `xml:"ListRolesResult>Roles>member"`
+}
+
+//ListRoles function
+func (iam *IAM) Roles(pathPrefix string) (*ListRolesResp, error) {
+	params := map[string]string{
+		"Action": "ListRoles",
+	}
+	if pathPrefix != "" {
+		params["PathPrefix"] = pathPrefix
+	}
+	resp := new(ListRolesResp)
+	if err := iam.query(params, resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
 }
